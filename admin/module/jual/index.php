@@ -22,8 +22,8 @@
 	<?php }?>
 	<div class="row">
 		<div class="col-sm-4">
-			<div class="card card-primary mb-3">
-				<div class="card-header bg-primary text-white">
+			<div class="card card-success mb-3">
+				<div class="card-header bg-success text-white">
 					<h5><i class="fa fa-search"></i> Cari Barang</h5>
 				</div>
 				<div class="card-body">
@@ -32,8 +32,8 @@
 			</div>
 		</div>
 		<div class="col-sm-8">
-			<div class="card card-primary mb-3">
-				<div class="card-header bg-primary text-white">
+			<div class="card card-success mb-3">
+				<div class="card-header bg-success text-white">
 					<h5><i class="fa fa-list"></i> Hasil Pencarian</h5>
 				</div>
 				<div class="card-body">
@@ -47,8 +47,8 @@
 		
 
 		<div class="col-sm-12">
-			<div class="card card-primary">
-				<div class="card-header bg-primary text-white">
+			<div class="card card-success">
+				<div class="card-header bg-success text-white">
 					<h5><i class="fa fa-shopping-cart"></i> KASIR
 					<a class="btn btn-danger float-right" 
 						onclick="javascript:return confirm('Apakah anda ingin reset keranjang ?');" href="fungsi/hapus/hapus.php?penjualan=jual">
@@ -108,8 +108,11 @@
 							<?php
 							// proses bayar dan ke nota
 							if(!empty($_GET['nota'] == 'yes')) {
-								$total = $_POST['total'];
-								$bayar = $_POST['bayar'];
+								$diskon = isset($_POST['diskon']) ? $_POST['diskon'] : 0;
+								$total_awal = $total_bayar;
+								$total_setelah_diskon = $total_awal - ($total_awal * ($diskon / 100));
+								$bayar = isset($_POST['bayar']) ? (int)$_POST['bayar'] : 0;
+								$kembali = $bayar - $total_setelah_diskon;
 								if(!empty($bayar))
 								{
 									$hitung = $bayar - $total;
@@ -125,8 +128,13 @@
 										
 										for($x=0;$x<$jumlah_dipilih;$x++){
 
-											$d = array($id_barang[$x],$id_member[$x],$jumlah[$x],$total[$x],$tgl_input[$x],$periode[$x]);
-											$sql = "INSERT INTO nota (id_barang,id_member,jumlah,total,tanggal_input,periode) VALUES(?,?,?,?,?,?)";
+											$diskon = isset($_POST['diskon']) ? $_POST['diskon'] : 0;
+											$total_asli = $total[$x];
+											$diskon_persen = $diskon;
+											$total_akhir = $total_asli - ($total_asli * ($diskon_persen / 100));
+											
+											$d = array($id_barang[$x], $id_member[$x], $jumlah[$x], $total_asli, $diskon_persen, $total_akhir, $tgl_input[$x], $periode[$x]);
+											$sql = "INSERT INTO nota (id_barang, id_member, jumlah, total, diskon, total_akhir, tanggal_input, periode) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 											$row = $config->prepare($sql);
 											$row->execute($d);
 
@@ -159,17 +167,26 @@
 									<input type="hidden" name="id_member[]" value="<?php echo $isi['id_member'];?>">
 									<input type="hidden" name="jumlah[]" value="<?php echo $isi['jumlah'];?>">
 									<input type="hidden" name="total1[]" value="<?php echo $isi['total'];?>">
-									<input type="hidden" name="tgl_input[]" value="<?php echo $isi['tanggal_input'];?>">
+									<input type="hidden" name="tgl_input[]" value="<?php echo date('Y-m-d'); ?>">
 									<input type="hidden" name="periode[]" value="<?php echo date('m-Y');?>">
 								<?php $no++; }?>
 								<tr>
-									<td>Total Semua  </td>
-									<td><input type="text" class="form-control" name="total" value="<?php echo $total_bayar;?>"></td>
-								
+									<td>Harga Sebelum Diskon</td>
+									<td><input type="text" class="form-control" id="harga_asli" value="<?php echo $total_bayar; ?>" readonly></td>
+								</tr>
+								<tr>
+									<td>Diskon (%)</td>
+									<td><input type="number" class="form-control" id="diskon" name="diskon" value="<?php echo isset($diskon) ? $diskon : 0;?>" min="0" max="100" onchange="hitungDiskon()"></td>
+								</tr>
+								<tr>
+									<td>Total Setelah Diskon</td>
+									<td><input type="text" class="form-control" id="total_setelah_diskon" name="total" readonly value="<?php echo isset($total_setelah_diskon) ? round($total_setelah_diskon) : ''; ?>"></td>
+
 									<td>Bayar  </td>
 									<td><input type="text" class="form-control" name="bayar" value="<?php echo $bayar;?>"></td>
 									<td><button class="btn btn-success"><i class="fa fa-shopping-cart"></i> Bayar</button>
-									<?php  if(!empty($_GET['nota'] == 'yes')) {?>
+
+									<?php  if(isset($_GET['nota']) && $_GET['nota'] === 'yes') {?>
 										<a class="btn btn-danger" href="fungsi/hapus/hapus.php?penjualan=jual">
 										<b>RESET</b></a></td><?php }?></td>
 								</tr>
@@ -177,11 +194,11 @@
 							<!-- aksi ke table nota -->
 							<tr>
 								<td>Kembali</td>
-								<td><input type="text" class="form-control" value="<?php echo $hitung;?>"></td>
+								<td><input type="text" class="form-control" readonly value="<?php echo isset($kembali) ? round($kembali) : ''; ?>"></td>
 								<td></td>
 								<td>
-									<a href="print.php?nm_member=<?php echo $_SESSION['admin']['nm_member'];?>
-									&bayar=<?php echo $bayar;?>&kembali=<?php echo $hitung;?>" target="_blank">
+								<a href="print.php?nm_member=<?php echo $_SESSION['admin']['nm_member'];?>
+								&bayar=<?php echo $bayar;?>&kembali=<?php echo $kembali;?>&diskon=<?php echo $diskon;?>&total_akhir=<?php echo $total_setelah_diskon;?>" target="_blank">
 									<button class="btn btn-secondary">
 										<i class="fa fa-print"></i> Print Untuk Bukti Pembayaran
 									</button></a>
@@ -197,14 +214,14 @@
 	</div>
 	
 
-<script>
-// AJAX call for autocomplete 
+	<script>
+// AJAX call untuk autocomplete pencarian barang
 $(document).ready(function(){
 	$("#cari").change(function(){
 		$.ajax({
 			type: "POST",
 			url: "fungsi/edit/edit.php?cari_barang=yes",
-			data:'keyword='+$(this).val(),
+			data: 'keyword=' + $(this).val(),
 			beforeSend: function(){
 				$("#hasil_cari").hide();
 				$("#tunggu").html('<p style="color:green"><blink>tunggu sebentar</blink></p>');
@@ -216,6 +233,34 @@ $(document).ready(function(){
 			}
 		});
 	});
+
+	// Cegah submit saat tekan Enter di kolom diskon dan hitung diskon
+	const inputDiskon = document.getElementById('diskon');
+	if (inputDiskon) {
+		inputDiskon.addEventListener('keydown', function(e) {
+			if (e.key === 'Enter') {
+				e.preventDefault(); // cegah submit
+				hitungDiskon();    // jalankan hitung diskon
+			}
+		});
+
+		// Optional: hitung otomatis saat halaman dimuat
+		hitungDiskon();
+	}
 });
-//To select country name
+
+// Fungsi hitung diskon
+function hitungDiskon() {
+	const hargaAsliInput = document.getElementById('harga_asli');
+	const diskonInput = document.getElementById('diskon');
+	const totalSetelahDiskonInput = document.getElementById('total_setelah_diskon');
+
+	if (hargaAsliInput && diskonInput && totalSetelahDiskonInput) {
+		const hargaAsli = parseFloat(hargaAsliInput.value) || 0;
+		const diskon = parseFloat(diskonInput.value) || 0;
+		const diskonRupiah = (diskon / 100) * hargaAsli;
+		const totalSetelahDiskon = hargaAsli - diskonRupiah;
+		totalSetelahDiskonInput.value = Math.round(totalSetelahDiskon);
+	}
+}
 </script>

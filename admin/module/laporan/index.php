@@ -138,18 +138,34 @@
 			<div class="card-body">
 				<div class="table-responsive">
 					<table class="table table-bordered w-100 table-sm" id="example1">
-						<thead>
-							<tr style="background:#DFF0D8;color:#333;">
-								<th> No</th>
-								<th> ID Barang</th>
-								<th> Nama Barang</th>
-								<th style="width:10%;"> Jumlah</th>
-								<th style="width:10%;"> Modal</th>
-								<th style="width:10%;"> Total</th>
-								<th> Kasir</th>
-								<th> Tanggal Input</th>
-							</tr>
-						</thead>
+					<thead>
+								<tr style="background:#DFF0D8;color:#333;">
+									<th>No</th>
+									<th>ID Barang</th>
+									<th>Nama Barang</th>
+									<th>Nama Kasir</th>
+									<th>Jumlah</th>
+									<th>Modal Awal</th>
+									<th>Total</th>
+									<th>Diskon</th>
+									<th>Total Akhir</th>
+									<th>Tanggal Input</th>
+									<th>Periode</th>
+								</tr>
+								<tr>
+									<th></th>
+									<th><input type="text" placeholder="Cari ID" class="form-control form-control-sm"></th>
+									<th><input type="text" placeholder="Cari Nama Barang" class="form-control form-control-sm"></th>
+									<th><input type="text" placeholder="Cari Kasir" class="form-control form-control-sm"></th>
+									<th><input type="text" placeholder="Cari Jumlah" class="form-control form-control-sm"></th>
+									<th><input type="text" placeholder="Cari Modal Awal" class="form-control form-control-sm"></th>
+									<th><input type="text" placeholder="Cari Total" class="form-control form-control-sm"></th>
+									<th><input type="text" placeholder="Cari Diskon" class="form-control form-control-sm"></th>
+									<th><input type="text" placeholder="Cari Total Akhir" class="form-control form-control-sm"></th>
+									<th><input type="text" placeholder="Cari Tanggal" class="form-control form-control-sm"></th>
+									<th><input type="text" placeholder="Cari Periode" class="form-control form-control-sm"></th>
+								</tr>
+							</thead>
 						<tbody>
 							<?php 
 								$no=1; 
@@ -157,48 +173,56 @@
 									$periode = $_POST['bln'].'-'.$_POST['thn'];
 									$no=1; 
 									$jumlah = 0;
-									$bayar = 0;
+									$total = 0;
 									$hasil = $lihat -> periode_jual($periode);
 								}elseif(!empty($_GET['hari'])){
 									$hari = $_POST['hari'];
 									$no=1; 
 									$jumlah = 0;
-									$bayar = 0;
+									$total = 0;
 									$hasil = $lihat -> hari_jual($hari);
 								}else{
 									$hasil = $lihat -> jual();
 								}
 							?>
 							<?php 
-								$bayar = 0;
+								$total = 0;
 								$jumlah = 0;
 								$modal = 0;
+								$total_akhir = 0;
 								foreach($hasil as $isi){ 
-									$bayar += $isi['total'];
-									$modal += $isi['harga_beli']* $isi['jumlah'];
+									$total += $isi['total'];
+									$modal += $isi['harga_beli'] * $isi['jumlah'];
 									$jumlah += $isi['jumlah'];
+									$total_akhir += $isi['total_akhir']; // sudah dipotong diskon
 							?>
 							<tr>
 								<td><?php echo $no;?></td>
 								<td><?php echo $isi['id_barang'];?></td>
 								<td><?php echo $isi['nama_barang'];?></td>
-								<td><?php echo $isi['jumlah'];?> </td>
-								<td>Rp.<?php echo number_format($isi['harga_beli']* $isi['jumlah']);?>,-</td>
-								<td>Rp.<?php echo number_format($isi['total']);?>,-</td>
 								<td><?php echo $isi['nm_member'];?></td>
+								<td><?php echo $isi['jumlah'];?></td>
+								<th>Rp.<?php echo number_format($modal);?>,-</th>
+								<td data-order="<?= $isi['total']; ?>">Rp.<?= number_format($isi['total'], 0, ',', '.'); ?>,-</td>
+								<td><?php echo round((($isi['total'] - $isi['total_akhir']) / $isi['total']) * 100); ?>%</td>
+								<td>Rp.<?php echo number_format($isi['total_akhir']);?>,-</td>
 								<td><?php echo $isi['tanggal_input'];?></td>
+								<td><?php echo $isi['periode'];?></td>
 							</tr>
 							<?php $no++; }?>
 						</tbody>
 						<tfoot>
 							<tr>
-								<th colspan="3">Total Terjual</td>
+								<th colspan="4">Total Terjual</td>
 								<th><?php echo $jumlah;?></td>
 								<th>Rp.<?php echo number_format($modal);?>,-</th>
-								<th>Rp.<?php echo number_format($bayar);?>,-</th>
-								<th style="background:#0bb365;color:#fff;">Keuntungan</th>
-								<th style="background:#0bb365;color:#fff;">
-									Rp.<?php echo number_format($bayar-$modal);?>,-</th>
+								<th>Rp.<?php echo number_format($total);?>,-</th>
+									<th>Total Pemasukan Sebelum / Sesudah Diskon</th>
+									<th>Rp.<?php echo number_format($total_akhir);?>,-</th>
+									<th style="background:#0bb365;color:#fff;">Keuntungan</th>
+									<th style="background:#0bb365;color:#fff;">
+										Rp.<?php echo number_format($total_akhir - $modal);?>,-
+									</th>
 							</tr>
 						</tfoot>
 					</table>
