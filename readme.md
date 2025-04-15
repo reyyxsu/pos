@@ -1,5 +1,5 @@
 ## Deskripsi Aplikasi 
-Aplikasi UP RPL
+Aplikasi Dengan Tema Point of Sales
 
 
 ### Follow My Insta : <a href="https://www.instagram.com/reyyxsu_/">https://www.instagram.com/reyyxsu_/</a>
