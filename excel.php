@@ -11,7 +11,7 @@ header("Expires: 0");
 header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
 header("Cache-Control: private",false); 
 
-require 'config.php';
+require 'koneksi.php';
 include $view;
 $lihat = new view($config);
 

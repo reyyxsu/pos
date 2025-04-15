@@ -2,7 +2,7 @@
 	@ob_start();
 	session_start();
 	if(isset($_POST['proses'])){
-		require 'config.php';
+		require 'koneksi.php';
 			
 		$user = strip_tags($_POST['user']);
 		$pass = strip_tags($_POST['pass']);

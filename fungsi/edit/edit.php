@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!empty($_SESSION['admin'])) {
-    require '../../config.php';
+    require '../../koneksi.php';
     if (!empty($_GET['pengaturan'])) {
         $nama= htmlentities($_POST['namatoko']);
         $alamat = htmlentities($_POST['alamat']);

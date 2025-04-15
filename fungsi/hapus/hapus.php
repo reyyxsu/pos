@@ -2,7 +2,7 @@
 
 session_start();
 if (!empty($_SESSION['admin'])) {
-    require '../../config.php';
+    require '../../koneksi.php';
     if (!empty(htmlentities($_GET['kategori']))) {
         $id= htmlentities($_GET['id']);
         $data[] = $id;

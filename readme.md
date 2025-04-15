@@ -8,7 +8,7 @@ Aplikasi Dengan Tema Point of Sales
 <hr>
 
 ## Setting Koneksi PHP
-setting koneksi di config.php dan ganti username, password dan dbname nya
+setting koneksi di koneksi.php dan ganti username, password dan dbname nya
 
 ## Penggunaan Login
 Username : admin

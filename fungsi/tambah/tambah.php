@@ -2,7 +2,7 @@
 
 session_start();
 if (!empty($_SESSION['admin'])) {
-    require '../../config.php';
+    require '../../koneksi.php';
     if (!empty($_GET['kategori'])) {
         $nama= htmlentities(htmlentities($_POST['kategori']));
         $tgl= date("j F Y, G:i");

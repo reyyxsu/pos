@@ -5,11 +5,11 @@ if(!empty($_SESSION['admin'])){ }else{
 	echo '<script>window.location="login.php";</script>';
 	exit;
 }
-require 'config.php';
+require 'koneksi.php';
 include $view;
 $lihat = new view($config);
 
-// AMANIN DATA
+// AMANKAN DATA
 $toko = $lihat->toko() ?: ['nama_toko' => '-', 'alamat_toko' => '-'];
 $hsl = $lihat->penjualan() ?: [];
 
